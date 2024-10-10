@@ -1,0 +1,182 @@
+class SendMoneyPage extends StatefulWidget {
+  @override
+  _SendMoneyPageState createState() => _SendMoneyPageState();
+}
+
+class _SendMoneyPageState extends State<SendMoneyPage> {
+  final _formKey = GlobalKey<FormState>();
+  String recipientName = '';
+  String amount = '';
+  String selectedPaymentMethod = 'Bank Transfer';
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Send Money")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              // Recipient Name TextField
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Recipient Name'),
+                onChanged: (value) {
+                  setState(() {
+                    recipientName = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Recipient name is required';
+                  }
+                  return null;
+                },
+              ),
+              // Amount TextField
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Amount'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  setState(() {
+                    amount = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || double.tryParse(value) == null || double.parse(value) <= 0) {
+                    return 'Please enter a positive amount';
+                  }
+                  return null;
+                },
+              ),
+              // DropdownButton for Payment Method
+              DropdownButtonFormField<String>(
+                value: selectedPaymentMethod,
+                items: ['Bank Transfer', 'Credit Card', 'PayPal'].map((method) {
+                  return DropdownMenuItem<String>(
+                    value: method,
+                    child: Text(method),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedPaymentMethod = value!;
+                  });
+                },
+                decoration: InputDecoration(labelText: 'Payment Method'),
+              ),
+              // Switch for Marking as Favorite
+              SwitchListTile(
+                title: Text('Mark as Favorite'),
+                value: isFavorite,
+                onChanged: (value) {
+                  setState(() {
+                    isFavorite = value;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    // Process the transaction
+                  }
+                },
+                child: Text('Send Money'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+#Part 2: Custom Widgets
+class CustomButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  const CustomButton({required this.text, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        textStyle: TextStyle(fontSize: 18),
+      ),
+      onPressed: onPressed,
+      child: Text(text),
+    );
+  }
+}
+
+
+
+CustomButton(
+  text: 'Send Money',
+  onPressed: () {
+    // Transaction action here
+  },
+),
+
+#Part 3: Animations
+
+class SuccessMessage extends StatefulWidget {
+  @override
+  _SuccessMessageState createState() => _SuccessMessageState();
+}
+
+class _SuccessMessageState extends State<SuccessMessage> {
+  bool _isVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _isVisible = !_isVisible;
+            });
+          },
+          child: Text('Complete Transaction'),
+        ),
+        AnimatedOpacity(
+          opacity: _isVisible ? 1.0 : 0.0,
+          duration: Duration(seconds: 2),
+          child: Text(
+            'Transaction Successful!',
+            style: TextStyle(fontSize: 24, color: Colors.green),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+Navigator.push(
+  context,
+  PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => DashboardPage(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(1.0, 0.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  ),
+);
+
+
